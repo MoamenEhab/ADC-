@@ -11,7 +11,6 @@
 #include "macros.h"
 #include <avr/delay.h>
 #include "register.h"
-#include "ADC_Configrations.h"
 #include "ADC_interface.h"
 #include "private.h"
 /* u16 myADCval;                                                                   //----------> (.bss) volatile memory

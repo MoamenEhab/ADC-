@@ -10,13 +10,12 @@
 #include "DIO.h"
 #include "macros.h"
 #include "register.h"
-#include "ADC_Configrations.h"
 #include "ADC_interface.h"
 #include "ADC_Private.h"
+#include "ADC_Configrations.h"
 
 /*************************global variable used to check the ADC feature selected *************************/
 static u8 Feature ;
-
 
 /***************global struct that will carry digital values of the ADC channels selected*****************/
 static ADCvalues ADCvals;
@@ -36,12 +35,6 @@ void (*ptrToCallBackFun) (u8 channel , u16 val);
 /*************************pointer to callbackFunc that user will create***********************************/
 void (*ptrTofunction)(u16 *pointer)  ;
 
-/***************global array that will carry digital values of the ADC channels selected******************/
-u16 Digitalvals[NUM_OF_CHANNELS];
-
-/********pointer to the global array that will carry digital values of the ADC channels selected**********/
-u16 * ptr = &Digitalvals;
-
 /*****************global var that will carry the current state of the ADC channels selected***************/
 static u8 Current_CH ;
 
@@ -56,10 +49,10 @@ void ADC_init(void)
 {
 	digitalVal=0 ;
 
-	ADCvals.value0=0XFFFF;
-	ADCvals.value1=0XFFFF;
-	ADCvals.value2=0XFFFF;
-	ADCvals.value3=0XFFFF;
+	ADCvals.value0=INVALID_VALUE;
+	ADCvals.value1=INVALID_VALUE;
+	ADCvals.value2=INVALID_VALUE;
+	ADCvals.value3=INVALID_VALUE;
 
 /*********************************** Set ADC REF VOLTAGE**************************************************/
 	ADC_setRefVoltage();
@@ -85,7 +78,7 @@ bitset(ADCSRA,ADEN);
 /* conversion process the error state will be StatusNotOk , if not the error state will be StatusOk      */
 /* so please check the error states first , digital value will be passed to the function  by address     */
 
-error ADC_StartConversion(u8 channel , u16 * ptr_TodigitalVal)
+error ADC_syncronousStartConversion(u8 channel , u16 * ptr_TodigitalVal)
 {
 
 /**********************************initialize of error Counter********************************************/
@@ -174,9 +167,8 @@ void ADC_customizeFreeRunConversion(void *ptrTofn(u16 *p))
 	Current_CH=0;
 	Feature=Feature_customizeFreeRunConversion;
 	ptrTofunction = ptrTofn;
-	ADC_channel=CONVERSION_CH_0;
 /********************************* Set channel to be converted********************************************/
-	ADMUX |= CONVERSION_CH_0;
+	ADMUX |= Digitalvals[Current_CH];
 /******************************* enable of ADC interrupt (PIE)********************************************/
 	bitset(ADCSRA,ADIE);
 /************************************** Start Conversion *************************************************/
@@ -304,7 +296,10 @@ ISR(ADC_vect)
 	case Feature_asyncronousConversion :
 
 						digitalVal= ADC_getDigitalValue();
+						if (ptrToCallBackFun != NULL)
+						{
 						ptrToCallBackFun(ADC_channel , digitalVal);
+						}
 						break;
 
 
@@ -340,7 +335,10 @@ ISR(ADC_vect)
 
 						case CONVERSION_CHANNEL_3 :
 							ADCvals.value3=ADC_getDigitalValue();
+							if (ptrTocallbkfn != NULL)
+							{
 							ptrTocallbkfn(ADCvals);
+							}
 							bitclear(ADCSRA,ADIE);
 							break;
 						}
@@ -348,138 +346,30 @@ ISR(ADC_vect)
 
 	   case Feature_customizeFreeRunConversion :
 
-						switch(ADC_channel)
-						{
-						case CONVERSION_CH_0 :
-							ptr[0]=ADC_getDigitalValue();
-							ADC_channel=CONVERSION_CH_1;
-							ADMUX |= CONVERSION_CH_1;
-							bitset(ADCSRA,ADIE);
-							bitset(ADCSRA,ADSC);
+					   Digitalvals[Current_CH]=ADC_getDigitalValue();
+
+					   if(Current_CH < LAST_CHANNEL  && Digitalvals[Current_CH+1]!=0)
+					   {
+
+						   Current_CH ++ ;
+
+						   ADMUX |= Digitalvals[Current_CH];
+
+						   bitset(ADCSRA,ADIE);
+						   bitset(ADCSRA,ADSC);
+
+					   }
+					   else
+					   {
+						   if(ptrTofunction != NULL)
+						   {
+							   ptrTofunction(Digitalvals);
+						   }
+						   bitclear(ADCSRA,ADIE);
+						   bitclear(ADCSRA,ADSC);
+					   }
 
 
-							break;
-
-						case CONVERSION_CH_1 :
-							ptr[1]=ADC_getDigitalValue();
-							Current_CH++;
-							if(Current_CH != LAST_CHANNEL)
-							{
-								ADC_channel=CONVERSION_CH_2;
-								ADMUX |= CONVERSION_CH_2;
-								bitset(ADCSRA,ADIE);
-								bitset(ADCSRA,ADSC);
-							}
-							else
-							{
-								ptrTofunction( &Digitalvals);
-								bitclear(ADCSRA,ADIE);
-								Current_CH=0;
-							}
-							break;
-
-						case CONVERSION_CH_2 :
-							Current_CH++;
-							ptr[2]=ADC_getDigitalValue();
-							if(Current_CH != LAST_CHANNEL)
-							{
-								ADC_channel=CONVERSION_CH_3;
-								ADMUX |= CONVERSION_CH_3;
-								bitset(ADCSRA,ADIE);
-								bitset(ADCSRA,ADSC);
-							}
-							else
-							{
-								ptrTofunction(&Digitalvals);
-								bitclear(ADCSRA,ADIE);
-								Current_CH=0;
-							}
-							break;
-
-						case CONVERSION_CH_3 :
-							Current_CH++;
-
-							ptr[3]=ADC_getDigitalValue();
-							if(Current_CH != LAST_CHANNEL)
-							{
-								ADC_channel=CONVERSION_CH_4;
-								ADMUX |= CONVERSION_CH_4;
-								bitset(ADCSRA,ADIE);
-								bitset(ADCSRA,ADSC);
-							}
-							else
-							{
-								ptrTofunction(&Digitalvals);
-								bitclear(ADCSRA,ADIE);
-								Current_CH=0;
-							}
-							break;
-
-						case CONVERSION_CH_4 :
-							Current_CH++;
-
-							ptr[4]=ADC_getDigitalValue();
-							if(Current_CH != LAST_CHANNEL)
-							{
-								ADC_channel=CONVERSION_CH_5;
-								ADMUX |= CONVERSION_CH_5;
-								bitset(ADCSRA,ADIE);
-								bitset(ADCSRA,ADSC);
-							}
-							else
-							{
-								ptrTofunction(&Digitalvals);
-								bitclear(ADCSRA,ADIE);
-								Current_CH=0;
-							}
-							break;
-
-						case CONVERSION_CH_5 :
-							Current_CH++;
-
-							ptr[5]=ADC_getDigitalValue();
-							if(Current_CH != LAST_CHANNEL)
-							{
-								ADC_channel=CONVERSION_CH_6;
-								ADMUX |= CONVERSION_CH_6;
-								bitset(ADCSRA,ADIE);
-								bitset(ADCSRA,ADSC);
-							}
-							else
-							{
-								ptrTofunction(&Digitalvals);
-								bitclear(ADCSRA,ADIE);
-								Current_CH=0;
-							}
-							break;
-
-						case CONVERSION_CH_6 :
-							Current_CH++;
-
-							ptr[6]=ADC_getDigitalValue();
-							if(Current_CH != LAST_CHANNEL)
-							{
-								ADC_channel=CONVERSION_CH_7;
-								ADMUX |= CONVERSION_CH_7;
-								bitset(ADCSRA,ADIE);
-								bitset(ADCSRA,ADSC);
-							}
-							else
-							{
-								ptrTofunction(&Digitalvals);
-								bitclear(ADCSRA,ADIE);
-								Current_CH=0;
-							}
-							break;
-
-						case CONVERSION_CH_7 :
-
-							ptr[7]=ADC_getDigitalValue();
-							ptrTofunction(&Digitalvals);
-							bitclear(ADCSRA,ADIE);
-							Current_CH=0;
-							break;
-						}
 						break;
 			}
 }
@@ -489,8 +379,7 @@ ISR(ADC_vect)
 /* Inputs : void														 			                     */
 /* 																								         */
 /* Outputs: void																	                     */
-void ADC_setRefVoltage(void);
-void ADC_setRefVoltage(void)
+static void ADC_setRefVoltage(void)
 {
 	switch(ADC_REF_VOLTAGE)
 		{
@@ -520,8 +409,7 @@ void ADC_setRefVoltage(void)
 /* Inputs : void														 			                     */
 /* 																								         */
 /* Outputs: void																	                     */
-void ADC_setFrequency(void);
-void ADC_setFrequency(void)
+static void ADC_setFrequency(void)
 {
 	switch(ADC_CLOCK_FREQUENCY)
 	{
@@ -585,8 +473,7 @@ void ADC_setFrequency(void)
 /* Inputs : void														 			                     */
 /* 																								         */
 /* Outputs: void																	                     */
-void ADC_setResolution(void);
-void ADC_setResolution(void)
+static void ADC_setResolution(void)
 {
 	switch(ADC_RESOLUTION)
 		{

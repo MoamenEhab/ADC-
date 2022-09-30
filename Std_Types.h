@@ -11,4 +11,5 @@ typedef float f32;
 typedef double f64;
 typedef short unsigned int error;
 enum {  StatusNotOk , StatusOk };
+#define    NULL      ((void *)0)
 #endif

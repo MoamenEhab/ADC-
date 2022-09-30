@@ -39,22 +39,17 @@
 
 
 /**************************************************************************/
-/*********************  ADC channels for FreeR CONFIG *********************/
+/***************  ADC channels for  ADC_freeRunConversion *****************/
 
 #define  CONVERSION_CHANNEL_0                (ADC_CHANNEL_0)
 #define  CONVERSION_CHANNEL_1                (ADC_CHANNEL_1)
 #define  CONVERSION_CHANNEL_2                (ADC_CHANNEL_2)
 #define  CONVERSION_CHANNEL_3                (ADC_CHANNEL_3)
 /**************************************************************************/
-#define  NUM_OF_CHANNELS                      4
-#define  CONVERSION_CH_0                (ADC_CHANNEL_0)
-#define  CONVERSION_CH_1                (ADC_CHANNEL_1)
-#define  CONVERSION_CH_2                (ADC_CHANNEL_2)
-#define  CONVERSION_CH_3                (ADC_CHANNEL_3)
-#define  CONVERSION_CH_4                (CH4_UNDEFINED)
-#define  CONVERSION_CH_5                (CH5_UNDEFINED)
-#define  CONVERSION_CH_6                (CH6_UNDEFINED)
-#define  CONVERSION_CH_7                (CH7_UNDEFINED)
+/***********  ADC channels for  ADC_customizefreeRunConversion ************/
 
-#define LAST_CHANNEL                        (NUM_OF_CHANNELS-1)
+#define  NUM_OF_CHANNELS                      (4U)
+
+static u16 Digitalvals[NUM_OF_CHANNELS]={ADC_CHANNEL_0,ADC_CHANNEL_1,ADC_CHANNEL_2,ADC_CHANNEL_3};
+
 #endif /* ADC_CONFIGRATIONS_H_ */

@@ -38,6 +38,20 @@ typedef struct
 
 void ADC_init(void);
 /*********************************************************************************************************/
+/* Description: starting ADC conversion by selecting the channel found in "ADC_interface.h" file         */
+/*				and return digital value to use in ur application                                        */
+/*																				            	         */
+/* Inputs : Channel , *ptr_TodigitalVal                                                                  */
+/*          u should pass the channel u selected in "ADC_interface.h" as input argument to enable ADC    */
+/*  	    on this channel . then create variable &pass the address of the var to the pointer input     */
+/*          argument to make the variable represents the ADC digital value                               */
+/*            									 			                                             */
+/* 																								         */
+/* Outputs: return of this function will be the error state if there is any error occur during the       */
+/* conversion process the error state will be StatusNotOk , if not the error state will be StatusOk      */
+/* so please check the error states first , digital value will be passed to the function  by address     */
+
+error ADC_syncronousStartConversion(u8 channel , u16 * ptr_TodigitalVal);
 /*********************************************************************************************************/
 /* Description: Initialization of ADC includes  defining the configurations found in the                 */
 /*				"ADC_Configrations.h" file       							                             */
