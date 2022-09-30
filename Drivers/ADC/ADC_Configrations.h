@@ -38,13 +38,7 @@
 #define ADC_RESOLUTION                 (ADC_RESOLUTION_8_BIT)
 
 
-/**************************************************************************/
-/***************  ADC channels for  ADC_freeRunConversion *****************/
 
-#define  CONVERSION_CHANNEL_0                (ADC_CHANNEL_0)
-#define  CONVERSION_CHANNEL_1                (ADC_CHANNEL_1)
-#define  CONVERSION_CHANNEL_2                (ADC_CHANNEL_2)
-#define  CONVERSION_CHANNEL_3                (ADC_CHANNEL_3)
 /**************************************************************************/
 /***********  ADC channels for  ADC_customizefreeRunConversion ************/
 

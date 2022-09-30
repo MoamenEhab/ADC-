@@ -19,14 +19,7 @@
 #define ADC_CHANNEL_6     (6U)
 #define ADC_CHANNEL_7     (7U)
 
-/*********************************************************************************************************/
-typedef struct
-{
-	u16 value0;
-	u16 value1;
-	u16 value2;
-	u16 value3;
-}ADCvalues ;
+
 
 /*********************************************************************************************************/
 /* Description: Initialization of ADC includes  defining the configurations found in the                 */
@@ -52,24 +45,7 @@ void ADC_init(void);
 /* so please check the error states first , digital value will be passed to the function  by address     */
 
 error ADC_syncronousStartConversion(u8 channel , u16 * ptr_TodigitalVal);
-/*********************************************************************************************************/
-/* Description: Initialization of ADC includes  defining the configurations found in the                 */
-/*				"ADC_Configrations.h" file       							                             */
-/*																				            	         */
-/* Inputs : void *ptrTofn(ADCvalues)                                                                     */
-/*          u r responsible to create global object of'ADCvalues' struct data type. then create function */
-/*          returns void and takes object of 'ADCvalues' struct data type as input argument in the       */
-/*          body of the function assign the value of the input object to the global object u created     */
-/*          the global object now carry ur 4 digital values of the four ADC channels u select            */
-/*          this function will be passed to  ADC_FreeR function as input argument	                     */
-/*          Example :                                                                                    */
-/*          ADCvalues myadcvalues;                                                                       */
-/*          void callbachfn(ADCvalues adcvalues)                                                         */
-/*          {myadcvalues=adcvalues;}                                                                     */
-/* 																								         */
-/* Outputs: void	                                                                                     */
 
-void ADC_freeRunConversion(void *ptrTofn(ADCvalues));
 /*********************************************************************************************************/
 /* Description: starting ADC conversion by selecting the channel found in "ADC_interface.h" file         */
 /*				and return digital value to use in ur application                                        */
@@ -96,7 +72,7 @@ void ADC_freeRunConversion(void *ptrTofn(ADCvalues));
 /* 																								         */
 /* Outputs: void                                                                                         */
 
-void ADC_asyncronousConversion(u8 channel , void * ptrToFun(u8, u16)) ;
+error ADC_asyncConversion(u8 channel , void * ptrToFun(u8, u16)) ;
 /*********************************************************************************************************/
 /* Description: Initialization of ADC includes  defining the configurations found in the                 */
 /*				"ADC_Configrations.h" file       							                             */
@@ -113,6 +89,6 @@ void ADC_asyncronousConversion(u8 channel , void * ptrToFun(u8, u16)) ;
 /*          {mypointer=pointer;}                                                                         */
 /* 																								         */
 /* Outputs: void	                                                                                     */
-void ADC_customizeFreeRunConversion(void *ptrTofn(u16*));
+error ADC_freeRunConversion(void *ptrTofn(u16*));
 
 #endif /* ADC_INTERFACE_H_ */

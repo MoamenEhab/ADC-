@@ -6,10 +6,10 @@
  */
 #include<stdio.h>
 #include <avr/delay.h>
-#include "Std_Types.h"
-#include "macros.h"
+#include "../../Common/Std_Types.h"
+#include "../../Common/macros.h"
 #include "DIO.h"
-#include "register.h"
+#include "../../Common/register.h"
 
 u8 DIO_Set_PORT_Direction(u8 portNum , u8 Direction)
 {
