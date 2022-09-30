@@ -29,6 +29,8 @@ void (*ptrToCallBackFun) (u8 channel , u16 val);
 /*************************pointer to callbackFunc that user will create***********************************/
 void (*ptrTofunction)(u16 *pointer)  ;
 
+static u16 Digitalvals[NUM_OF_CHANNELS];
+
 /*****************global var that will carry the current state of the ADC channels selected***************/
 static u8 Current_CH ;
 
@@ -157,7 +159,7 @@ error ADC_freeRunConversion(void *ptrTofn(u16 *p))
 		Feature=FEATURE_FREERUN_CONVERSION;
 		ptrTofunction = ptrTofn;
 		/********************************* Set channel to be converted********************************************/
-		ADMUX |= Digitalvals[Current_CH];
+		ADMUX |= freeRunChannels[Current_CH];
 		/******************************* enable of ADC interrupt (PIE)********************************************/
 		bitset(ADCSRA,ADIE);
 		/************************************** Start Conversion *************************************************/
@@ -284,12 +286,12 @@ ISR(ADC_vect)
 
 		Digitalvals[Current_CH]=ADC_getDigitalValue();
 
-		if(Current_CH < LAST_CHANNEL  && Digitalvals[Current_CH+1]!=0)
+		if(Current_CH < LAST_CHANNEL  && freeRunChannels[Current_CH+1]!=0)
 		{
 
 			Current_CH ++ ;
 
-			ADMUX |= Digitalvals[Current_CH];
+			ADMUX |= freeRunChannels[Current_CH];
 
 			bitset(ADCSRA,ADIE);
 			bitset(ADCSRA,ADSC);
